@@ -74,6 +74,44 @@ def get_authenticated_service(lastAuth):
     return googleapiclient.discovery.build(api_service_name, api_version, credentials=cred_token)
 
 ### <summary>
+# Recursively lists all videos from the current playlist
+### </summary>
+def list_playlist():
+    utils.logPrint("Clearing out yesterdays music", 0)
+
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+    youtube = get_authenticated_service(lastAuth)
+
+    # Makes the first round of API calls
+    request = youtube.playlistItems().list(
+        part="snippet,contentDetails",
+        maxResults=50,
+        playlistId=playlist
+    )
+
+    response = request.execute()
+    utils.logPrint(response, 0)
+
+    currentLen = response["pageInfo"]["totalResults"]
+    playlist_items = []    
+    for p in response['items']:
+        playlist_items.append(p)
+        
+    utils.logPrint("Getting previous days content", 0)
+    while len(playlist_items) < response["pageInfo"]['totalResults']:
+        request = youtube.playlistItems().list(
+            part="snippet,contentDetails",
+            maxResults=50,
+            playlistId=playlist,
+            pageToken=response["nextPageToken"]
+        )        
+        response = request.execute()
+        for p in response['items']:
+            playlist_items.append(p)
+    
+    return playlist_items
+
+### <summary>
 # Recursively removes all videos from the current playlist
 ### </summary>
 def clear_playlist():
