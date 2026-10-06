@@ -76,7 +76,7 @@ def get_authenticated_service(lastAuth):
 ### <summary>
 # Recursively lists all videos from the current playlist
 ### </summary>
-def list_playlist():
+def list_playlist(playlist_id: str):
     utils.logPrint("Clearing out yesterdays music", 0)
 
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -102,7 +102,7 @@ def list_playlist():
         request = youtube.playlistItems().list(
             part="snippet,contentDetails",
             maxResults=50,
-            playlistId=playlist,
+            playlistId=playlist_id,
             pageToken=response["nextPageToken"]
         )        
         response = request.execute()
